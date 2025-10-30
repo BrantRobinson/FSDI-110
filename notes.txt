@@ -1,0 +1,14 @@
+How to create a virtual environment
+
+WINDOWS: py -m venv venv
+
+How to activate the virtual environment
+WINDOWS: venv\Scripts\Activate
+
+How to install FLask
+pip install Flask
+
+How to run the application
+py server.py  (server.py is an example fileName)
+
+pip install -r requirements.txt -> this takes everything in the txt file and installs it in the venv
