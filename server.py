@@ -143,7 +143,11 @@ coupons = [
 
 @app.route("/api/coupons", methods=["GET"])
 def get_coupons():
-     return jsonify(coupons)
+     return jsonify({
+                    "success": True,
+                    "message": "Coupons retrieved successfully",
+                    "data": coupons
+     })
 
 @app.route("/api/coupon/<int:_id>", methods=["GET"])
 def get_one_coupon(_id):
