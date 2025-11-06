@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from http import HTTPStatus
 
 app = Flask(__name__) # instance of FLask
+CORS(app, origins=["http://localhost:5173", "http://localhost:5174", "https://mayapp.com"])
 
 
 @app.route("/", methods=["GET"])
@@ -68,25 +70,27 @@ def add_student():
      print("Hello Cohort 61")
      return student_names
 
+# ------------PRODUCTS------------
+
 products = [
      {
           "_id": 1,
           "title": "Nintendo Switch",
-          "price": 299.99,
+          "price": 29999,
           "category": "electronics",
           "image": "https://picsum.photos/seed/1/300/300"
      },
      {
           "_id": 2,
           "title": "Smart Refrigerator",
-          "price": 999.99,
+          "price": 99999,
           "category": "kitchen",
           "image": "https://picsum.photos/seed/2/300/300"
      },
      {
           "_id": 3,
           "title": "BLuetooth Speaker",
-          "price": 79.99,
+          "price": 7999,
           "category": "electronics",
           "image": "https://picsum.photos/seed/3/300/300"
      }
@@ -94,7 +98,7 @@ products = [
 
 
 
-@app.route("/api/products")
+@app.get("/api/products")
 def get_products():
      return jsonify({
           "success": True,
@@ -103,7 +107,7 @@ def get_products():
      }), HTTPStatus.OK # 200 - it would do this without this code, but we are overriding to always return code 200
 
 
-@app.route("/api/products/<int:product_id>", methods=["GET"])
+@app.get("/api/products/<int:product_id>")
 def  get_product_by_id(product_id):
      print(product_id)
      for product in products:
@@ -130,8 +134,44 @@ def add_product():
           "data": new_product
      }), HTTPStatus.CREATED
 
+@app.delete("/api/products/<int:id>")
+def delete_product(id):
+     for index, product in enumerate(products):
+          if product["_id"] == id:
+               products.pop(index)
+               return jsonify ({
+                    "success": True,
+                    "message": "Product Successfully Deleted",
+                    "data": product
+               }),HTTPStatus.OK
+     return jsonify ({
+          "success": False,
+          "message": "Product not found",
+          "data": product
+          }),HTTPStatus.NOT_FOUND
 
-
+@app.put("/api/products/<int:product_id>")
+def update_product(product_id):
+     data = request.get_json()
+     for product in products:
+          if product["_id"] == product_id:
+               if "title" in data: #experimenting to see if i can keep the title and other paramenters the same if they aren't passed in the json
+                    product["title"] = data["title"]
+               if "price" in data:
+                    product["price"] = data["price"]
+               if "category" in data:
+                    product["category"] = data["category"]
+               if "image" in data:
+                    product["image"] = data["image"]
+               return jsonify ({
+                    "success": True,
+                    "message": "Product Updated Successfully",
+                    "data": product
+               }),HTTPStatus.OK
+     return jsonify({
+          "success": False,
+          "message": "Product not found!"
+     }),HTTPStatus.NOT_FOUND
 
 #-----------COUPONS------------
 coupons = [
@@ -141,7 +181,7 @@ coupons = [
     ]
 
 
-@app.route("/api/coupons", methods=["GET"])
+@app.get("/api/coupons")
 def get_coupons():
      return jsonify({
                     "success": True,
@@ -149,7 +189,8 @@ def get_coupons():
                     "data": coupons
      })
 
-@app.route("/api/coupon/<int:_id>", methods=["GET"])
+
+@app.get("/api/coupon/<int:_id>")
 def get_one_coupon(_id):
      for coupon in coupons:
           if coupon["_id"] == _id:
@@ -161,6 +202,23 @@ def get_one_coupon(_id):
      return jsonify({
           "success": False,
           "message": "Coupon not found"
+     }),HTTPStatus.NOT_FOUND
+
+@app.put("/api/coupons/<int:coupon_id>")
+def update_coupon(coupon_id):
+     data = request.get_json()
+     for coupon in coupons:
+          if coupon["_id"] == coupon_id:
+               coupon["code"] = data["code"]
+               coupon["discount"] = data["discount"]
+               return jsonify ({
+                    "success": True,
+                    "message": "Coupon Updated Successfully",
+                    "data": coupon
+               }),HTTPStatus.OK
+     return jsonify({
+          "success": False,
+          "message": "Coupon not found!"
      }),HTTPStatus.NOT_FOUND
 
 
@@ -179,9 +237,27 @@ def add_coupon():
 @app.route("/api/coupons/count", methods=["GET"])
 def get_coupon_count():
     num_coupons = len(coupons)
-    return jsonify({"coupon-count ": num_coupons})
+    return jsonify({
+          "success": True,
+          "message": "Number of Coupons retrieved successfully",
+          "data": num_coupons
+     })
 
-
+@app.delete("/api/coupons/<int:id>")
+def delete_coupon(id):
+     for index, coupon in enumerate(coupons):
+          if coupon["_id"] == id:
+               coupons.pop(index)
+               return jsonify ({
+                    "success": True,
+                    "message": "Coupon Successfully Deleted",
+                    "data": coupon
+               }),HTTPStatus.OK
+     return jsonify ({
+          "success": False,
+          "message": "Coupon not found",
+          "data": coupon
+          }),HTTPStatus.NOT_FOUND
 
 
 @app.route("/cohort/<id>", methods=["GET"])
